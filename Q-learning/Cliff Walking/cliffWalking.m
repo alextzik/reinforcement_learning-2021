@@ -25,6 +25,8 @@ for i=1:1:nEpisodes
    
     while stop==0
        currentAction = policy(Q(currentState(1), currentState(2),:), currentPossActions, epsilon);
+       % Or policyUniform
+       
        [nextState, reward] = move(currentState, currentAction);
        Q(currentState(1), currentState(2), currentAction) = ...
            Q(currentState(1), currentState(2), currentAction) + alpha*(reward +...

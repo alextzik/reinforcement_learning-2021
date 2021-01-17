@@ -4,7 +4,7 @@ function [ action ] = policy( Qstate, currentPossActions,  epsilon )
     [~, greedyAction] = max(Qstate);
     nActions = length(currentPossActions);
     prob = rand;
-    if prob < 1-epsilon+epsilon/nActions
+    if prob < 1-epsilon
         action = greedyAction;
     else
         action = datasample(currentPossActions, 1);
