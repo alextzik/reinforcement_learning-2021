@@ -3,5 +3,7 @@ Implementation of various reinforcement learning algorithms in examples obtained
 
 Up until now, the following algorithms have been implemented:
 - Q-learning algorithm
-  - Cliff Walking Example of pg. 132 of the book's 2nd edition. ![Online Performance](https://github.com/alextzik/reinforcement_learning-2021/blob/main/Figures/Rewards_Q_Cliff.png) ![Game's Environment](https://github.com/alextzik/reinforcement_learning-2021/blob/main/Figures/CliffEnvironment.png)
+  - Cliff Walking Example of pg. 132 of the book's 2nd edition.
+    The algorithm implemented gives the optimal policy as:
+    [up, right, right, right, right, right, right, right, right, right, right, right, down], which is expected given the following figure for the environment. ![Online Performance](https://github.com/alextzik/reinforcement_learning-2021/blob/main/Figures/Rewards_Q_Cliff.png) ![Game's Environment](https://github.com/alextzik/reinforcement_learning-2021/blob/main/Figures/CliffEnvironment.png)
 
