@@ -3,5 +3,5 @@ Implementation of various reinforcement learning algorithms in examples obtained
 
 Up until now, the following algorithms have been implemented:
 - Q-learning algorithm
-  - Cliff Walking Example of pg. 132 of the book's 2nd edition. ![Optional Text](../master/Figures/Rewards_Q_Cliff.png)
+  - Cliff Walking Example of pg. 132 of the book's 2nd edition. ![Online Performance](../master/Figures/Rewards_Q_Cliff.png)
 
