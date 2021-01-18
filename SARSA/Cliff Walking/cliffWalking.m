@@ -2,7 +2,7 @@
 
 % Algorithm parameters
 alpha = 0.1;
-epsilon = 0.1; %These needs to reach 0 for SARSA to converge to optimal policy
+epsilon = 0.1; %This needs to reach 0 for SARSA to converge to optimal policy
 gamma = 0.9;
 Q = rand(4, 12, 4); % Q(S,a)
                      % a=1: left, a=2: up, a=3: right, a=4: down
@@ -19,7 +19,7 @@ nEpisodes = 500;
 sumRewards = zeros(nEpisodes, 1);
 
 for i=1:1:nEpisodes
-    % epsilon=0.1/i; % required in order for e-greedy policy to converge to greedy and thus Q to converge to Q of optimal.
+    epsilon=0.1/i; % required in order for e-greedy policy to converge to greedy and thus Q to converge to Q of optimal.
     currentState = [1, 1];
     currentPossActions = setActions(currentState);
     currentAction = policy(Q(currentState(1), currentState(2),:), currentPossActions, epsilon);
