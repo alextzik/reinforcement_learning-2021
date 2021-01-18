@@ -22,7 +22,7 @@ for i=1:1:nEpisodes
     currentState = [1, 1];
     currentPossActions = setActions(currentState);
     stop = 0;
-   
+    disp(i);
     while stop==0
        currentAction = policy(Q(currentState(1), currentState(2),:), currentPossActions, epsilon);
        % Or policyUniform
@@ -30,7 +30,7 @@ for i=1:1:nEpisodes
        [nextState, reward] = move(currentState, currentAction);
        Q(currentState(1), currentState(2), currentAction) = ...
            Q(currentState(1), currentState(2), currentAction) + alpha*(reward +...
-           max(Q(nextState(1), nextState(2), :)) -  Q(currentState(1), currentState(2), currentAction));
+           gamma*max(Q(nextState(1), nextState(2), :)) -  Q(currentState(1), currentState(2), currentAction));
        currentState = nextState;
        currentPossActions = setActions(currentState);
        
@@ -43,7 +43,8 @@ for i=1:1:nEpisodes
     
 end
 
-plot(1:1:nEpisodes, sumRewards);
+hold on;
+plot(1:1:nEpisodes, sumRewards, 'r');
 
 
 % Find optimal policy, given optimal value-action function
@@ -59,6 +60,14 @@ while stop==0
 
     if currentState(1)==1 && currentState(2)==12
            stop = 1;
+    end
+end
+
+% Create optimal value function
+V = zeros(4,12);
+for i=1:1:4
+    for j=1:1:12
+        V(i,j) = max(Q(i, j,:));
     end
 end
 
