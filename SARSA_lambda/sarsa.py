@@ -8,20 +8,22 @@
     The class includes the POMDP's entities, an update function and a step transition function.
 """
 
+# Necessary Packages
 import numpy as np
 from random import choices
 
+# SARSA(lambda) algorithm class
 class Sarsa:
 
     # Constructor of Class
     def __init__(self, setOfStates, setOfObservs, setOfActions, prob_o_s, prob_s_sa, r, gamma, lamda, alpha):
         self.setOfStates = setOfStates # set of states as list of integers
         self.setOfObservs = setOfObservs # set of observations as list of integers
-        self.setOfActions = setOfActions # set of actions as list of integers
+        self.setOfActions = setOfActions # set of actions as list 
         self.prob_o_s = prob_o_s # observation distribution as a 2D numpy array of size |S||O|
         self.prob_s_sa = prob_s_sa # transition distribution as a 3D numpy array of size |S||S||A|
         self.Q_o_a = np.zeros((len(self.setOfObservs),len(setOfActions))) # Q value table of size |O||A|
-        self.reward = r
+        self.reward = r # reward function
         self.eligibTraces = np.zeros((len(self.setOfObservs),len(setOfActions))) # initialization of eligibility traces for each (o,a) pair
         self.gamma = gamma # discount factor
         self.lamda = lamda # eligibility trace decay
@@ -51,19 +53,22 @@ class Sarsa:
         s_next = choices(self.setOfStates, self.prob_s_sa[:,self.setOfStates.index(s_current), self.setOfActions.index(a_current)])[0]
         r_current = self.reward(s_next)
         o_next = choices(self.setOfObservs, self.prob_o_s[:,self.setOfStates.index(s_next)])[0]
-        print(self.setOfActions[np.where(self.Q_o_a[self.setOfObservs.index(o_next),:]==np.max(self.Q_o_a[self.setOfObservs.index(o_next),:]))[0][0]])
         a_greedyNext = self.setOfActions[np.where(self.Q_o_a[self.setOfObservs.index(o_next),:]==np.max(self.Q_o_a[self.setOfObservs.index(o_next),:]))[0][0]]
+        #print(a_greedyNext)
         
         # create exploration distribution
         prob = []
         for i in range(len(self.setOfActions)):
             if i==self.setOfActions.index(a_greedyNext):
-                prob.append(1-self.exploration)
+                prob.append(1-self.exploration+self.exploration/(len(self.setOfActions)))
             else:
-                prob.append(self.exploration/(len(self.setOfActions)-1))
+                prob.append(self.exploration/(len(self.setOfActions)))
         
+        # choose action with exploration strategy
         a_next = choices(self.setOfActions, prob)[0]
+
+        # reduce exploration rate
         if self.exploration>0:
             self.exploration =- self.exploration/200000
 
-        return r_current, s_next, o_next, a_next
+        return r_current, s_next, o_next, a_next, a_greedyNext
