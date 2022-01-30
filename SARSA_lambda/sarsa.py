@@ -22,7 +22,7 @@ class Sarsa:
         self.setOfActions = setOfActions # set of actions as list 
         self.prob_o_s = prob_o_s # observation distribution as a 2D numpy array of size |S||O|
         self.prob_s_sa = prob_s_sa # transition distribution as a 3D numpy array of size |S||S||A|
-        self.Q_o_a = np.zeros((len(self.setOfObservs),len(setOfActions))) # Q value table of size |O||A|
+        self.Q_o_a = np.zeros((len(self.setOfObservs),len(self.setOfActions))) # Q value table of size |O||A|
         self.reward = r # reward function
         self.eligibTraces = np.zeros((len(self.setOfObservs),len(setOfActions))) # initialization of eligibility traces for each (o,a) pair
         self.gamma = gamma # discount factor
@@ -72,3 +72,10 @@ class Sarsa:
             self.exploration =- self.exploration/200000
 
         return r_current, s_next, o_next, a_next, a_greedyNext
+
+    # Zero eligibility traces when episode is over
+    """
+        The following function zeroes eligibility traces when episode is over
+    """
+    def zero_elig_trace(self):
+        self.eligibTraces = np.zeros((len(self.setOfObservs),len(self.setOfActions))) 
