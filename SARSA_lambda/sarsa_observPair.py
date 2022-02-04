@@ -1,0 +1,82 @@
+######################################################################
+#                   SARSA(lambda)                                    #
+######################################################################
+"""
+    This script contains the SARSA(lambda) implementation for a discrete 
+    state-action-observation POMDP problem, as implemented in the paper
+    Loch et al. for the case of augmented observation (pair of 2). Object oriented programming is used. 
+    The class includes the POMDP's entities, an update function and a step transition function.
+"""
+
+# Necessary Packages
+import numpy as np
+from random import choices
+
+# SARSA(lambda) algorithm class
+class Sarsa:
+
+    # Constructor of Class
+    def __init__(self, setOfStates, setOfObservs, setOfActions, prob_o_s, prob_s_sa, r, gamma, lamda, alpha):
+        self.setOfStates = setOfStates # set of states as list of integers
+        self.setOfObservs = setOfObservs # set of observations as list of integers
+        self.setOfActions = setOfActions # set of actions as list 
+        self.prob_o_s = prob_o_s # observation distribution as a 2D numpy array of size |S||O|
+        self.prob_s_sa = prob_s_sa # transition distribution as a 3D numpy array of size |S||S||A|
+        self.Q_o_a = np.zeros((len(self.setOfObservs), len(self.setOfObservs), len(self.setOfActions))) # Q value table of size |O||O||A|
+        self.reward = r # reward function
+        self.eligibTraces = np.zeros((len(self.setOfObservs), len(self.setOfObservs),len(self.setOfActions))) # initialization of eligibility traces for each (o,o,a) tuple
+        self.gamma = gamma # discount factor
+        self.lamda = lamda # eligibility trace decay
+        self.alpha = alpha # learning rate
+        self.exploration = 0.2 # exploration rate in epsilon greedy exploration strategy
+
+    # Q update
+    """
+        The following function updates the Q table based on a tuple (o_t, a_t, r_t, o_{t+1}, a_{t+1}), where o_t and o_{t+1} are pairs of observations
+    """
+    def update(self, o_current, a_current, r_current, o_next, a_next):
+        
+        # update eligibility traces
+        self.eligibTraces *= self.gamma*self.lamda
+        self.eligibTraces[self.setOfObservs.index(o_current[0]), self.setOfObservs.index(o_current[1]), self.setOfActions.index(a_current)] = 1
+
+        # update Q table
+        self.Q_o_a += self.alpha*self.eligibTraces*(r_current+\
+                        self.gamma*self.Q_o_a[self.setOfObservs.index(o_next[0]), self.setOfObservs.index(o_next[1]), self.setOfActions.index(a_next)]-\
+                        self.Q_o_a[self.setOfObservs.index(o_current[0]), self.setOfObservs.index(o_current[1]), self.setOfActions.index(a_current)])
+
+    # One-step transition
+    """
+        The following function performs a one-step update from the tuple (s_t, o_t, a_t), where o_t is a pair of observations
+    """
+    def step(self, s_current, o_current, a_current):
+        s_next = choices(self.setOfStates, self.prob_s_sa[:,self.setOfStates.index(s_current), self.setOfActions.index(a_current)])[0]
+        r_current = self.reward(s_next)
+        o_next = np.array([o_current[1], choices(self.setOfObservs, self.prob_o_s[:,self.setOfStates.index(s_next)])[0]])
+        a_greedyNext = self.setOfActions[np.where(self.Q_o_a[self.setOfObservs.index(o_next[0]), self.setOfObservs.index(o_next[1]),:]\
+            ==np.max(self.Q_o_a[self.setOfObservs.index(o_next[0]), self.setOfObservs.index(o_next[1]),:]))[0][0]]
+        #print(a_greedyNext)
+        
+        # create exploration distribution
+        prob = []
+        for i in range(len(self.setOfActions)):
+            if i==self.setOfActions.index(a_greedyNext):
+                prob.append(1-self.exploration+self.exploration/(len(self.setOfActions)))
+            else:
+                prob.append(self.exploration/(len(self.setOfActions)))
+        
+        # choose action with exploration strategy
+        a_next = choices(self.setOfActions, prob)[0]
+
+        # reduce exploration rate
+        if self.exploration>0:
+            self.exploration =- self.exploration/400000
+
+        return r_current, s_next, o_next, a_next, a_greedyNext
+
+    # Zero eligibility traces when episode is over
+    """
+        The following function zeroes eligibility traces when episode is over
+    """
+    def zero_elig_trace(self):
+        self.eligibTraces = np.zeros((len(self.setOfObservs), len(self.setOfObservs), len(self.setOfActions))) 

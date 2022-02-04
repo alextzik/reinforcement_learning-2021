@@ -9,7 +9,7 @@
 ######################################################################
 # Environment definition - Sutton's Grid World
 
-from sarsa import *
+from sarsa_observPair import *
 import matplotlib.pyplot as plt
 
 # Set of States
@@ -24,7 +24,7 @@ setOfActions = ['N', 'S', 'E', 'W']
 
 # Set of Observations
 numOfObservs = 6
-setOfObservs = [0,1,2,3,4,5]
+setOfObservs = [-1,0,1,2,3,4,5]
 
 # Observation Distribution
 prob_o_s = np.zeros((len(setOfObservs), len(setOfStates)))
@@ -162,7 +162,7 @@ prob_s_sa[8,7,:]=1
 
 # Parameter Initialization
 lamda = 0.9
-alpha = 0.01
+alpha = 0.001
 gamma = 1
 
 # Reward function
@@ -177,7 +177,7 @@ def r(s):
 
 ######################################################################
 # SARSA(lambda) deployment
-reward = np.zeros(300)
+reward = np.zeros(600)
 numOfTrials = 30
 
 for i_ in range(numOfTrials): # run the training for numOfTrials to smooth data
@@ -186,11 +186,12 @@ for i_ in range(numOfTrials): # run the training for numOfTrials to smooth data
     
     # set initial state, observation and action
     s = 8
-    o = 0
-    a = sarsa.setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o),:]==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o),:]))[0][0]]
+    o = np.array([-1, 0])
+    a = sarsa.setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o[0]), sarsa.setOfObservs.index(o[1]),:]\
+        ==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o[0]), sarsa.setOfObservs.index(o[1]), :]))[0][0]]
 
     # run for 300000 steps
-    for t_ in range(300000):
+    for t_ in range(600000):
         # perform a step
         r_current, s_next, o_next, a_next, a_greedyNext = sarsa.step(s, o, a)
 
@@ -205,7 +206,8 @@ for i_ in range(numOfTrials): # run the training for numOfTrials to smooth data
         # zero eligibility trace at end of episode
         if s==3 or s==7:
             sarsa.zero_elig_trace()
-
+            s = 8
+            o = np.array([-1, 0])
         print(t_)
 
         # deploy greedy strategy every 1000 steps
@@ -215,8 +217,9 @@ for i_ in range(numOfTrials): # run the training for numOfTrials to smooth data
             for j_ in range(101): # 101 runs 
                 count = 1
                 s_ = 8
-                o_ = 0
-                a_ = sarsa.setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o_),:]==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o_),:]))[0][0]]
+                o_ = np.array([-1,0])
+                a_ = sarsa.setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o_[0]), sarsa.setOfObservs.index(o_[1]),:]\
+                    ==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o_[0]), sarsa.setOfObservs.index(o_[1]), :]))[0][0]]
                 steps += 1
                 
                 # perform each run until we reach a terminal state or we reach maximum number of steps per episode (count)
@@ -236,13 +239,15 @@ reward /= (numOfTrials)
 
 # Print policy
 print(sarsa.Q_o_a)
-for o in range(len(setOfObservs)-2):
-    print(o, setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o),:]==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o),:]))[0][0]])
+for o1 in range(-1, len(setOfObservs)-2):
+    for o2 in range(-1, len(setOfObservs)-2):
+        print(o1, o2, setOfActions[np.where(sarsa.Q_o_a[sarsa.setOfObservs.index(o1), sarsa.setOfObservs.index(o2),:]\
+                    ==np.max(sarsa.Q_o_a[sarsa.setOfObservs.index(o1), sarsa.setOfObservs.index(o2), :]))[0][0]])
 
 
 # Plot greedy policy's reward 
-plt.plot([1000*i for i in range(50, 300)], reward[50:])
-plt.ylim(-0.10, 0.04)
+plt.plot([1000*i for i in range(600)], reward)
+plt.ylim(-0.05, 0.2)
 plt.xlabel("Number of Actions")
 plt.ylabel("Average Reward per Action of Greedy Policy")
 plt.show()
